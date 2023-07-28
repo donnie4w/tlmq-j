@@ -28,11 +28,6 @@
             <artifactId>libthrift</artifactId>
             <version>0.18.1</version>
         </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>32.1.1-jre</version>
-        </dependency>
         <!-- servlet -->
         <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
         <dependency>
@@ -94,6 +89,7 @@
             <url>https://github.com/donnie4w</url>
         </developer>
     </developers>
+
     <scm>
         <connection>scm:git:git://github.com/donnie4w/tlmq-j.git</connection>
         <developerConnection>scm:git:ssh://github.com/donnie4w/tlmq-j.git</developerConnection>
