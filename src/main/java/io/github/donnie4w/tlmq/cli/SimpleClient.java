@@ -19,16 +19,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
-public class SimpleClient extends ICli {
+public class SimpleClient extends ICli implements MqClient {
 
-    public PubByteHandler pubByteHandler;
-    public PubJsonHandler pubJsonHandler;
-    public PubMemHandler pubMemHandler;
-    public PullByteHandler pullByteHandler;
-    public PullJsonHandler pullJsonHandler;
-    public AckHandler ackHandler;
-    public ErrHandler errHandler;
-    public Before before;
+     PubByteHandler pubByteHandler;
+     PubJsonHandler pubJsonHandler;
+     PubMemHandler pubMemHandler;
+     PullByteHandler pullByteHandler;
+     PullJsonHandler pullJsonHandler;
+     AckHandler ackHandler;
+     ErrHandler errHandler;
+     Before before;
     public final static Logger logger = Logger.getLogger("tlmq");
     private int pingCount;
     public Cli cli;
@@ -37,6 +37,46 @@ public class SimpleClient extends ICli {
 
     public SimpleClient(String url, String auth) {
         super(url, auth);
+    }
+
+    @Override
+    public void pullByteHandler(PullByteHandler pullByteHandler) {
+        this.pullByteHandler = pullByteHandler;
+    }
+
+    @Override
+    public void pullJsonHandler(PullJsonHandler pullJsonHandler) {
+        this.pullJsonHandler = pullJsonHandler;
+    }
+
+    @Override
+    public void pubByteHandler(PubByteHandler pubByteHandler) {
+        this.pubByteHandler = pubByteHandler;
+    }
+
+    @Override
+    public void pubJsonHandler(PubJsonHandler pubJsonHandler) {
+        this.pubJsonHandler = pubJsonHandler;
+    }
+
+    @Override
+    public void pubMemHandler(PubMemHandler pubMemHandler) {
+        this.pubMemHandler = pubMemHandler;
+    }
+
+    @Override
+    public void ackHandler(AckHandler ackHandler) {
+        this.ackHandler = ackHandler;
+    }
+
+    @Override
+    public void errHandler(ErrHandler errHandler) {
+        this.errHandler = errHandler;
+    }
+
+    @Override
+    public void before(Before before) {
+        this.before = before;
     }
 
     public void connect() {
