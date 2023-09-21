@@ -26,7 +26,7 @@ import java.util.zip.Inflater;
 
 public class TSerialize {
 
-    public static byte[] TEncode(@NotNull TSerializable ts) throws TlException {
+    public static byte[] tEncode(@NotNull TSerializable ts) throws TlException {
         try {
             TMemoryBuffer tmb = new TMemoryBuffer(1024);
             ts.write(new TCompactProtocol(tmb));
@@ -36,7 +36,7 @@ public class TSerialize {
         }
     }
 
-    public static <T extends TSerializable> T TDecode(byte[] bs, T ts) throws TlException {
+    public static <T extends TSerializable> T tDecode(byte[] bs, T ts) throws TlException {
         try {
             TMemoryBuffer tmb = new TMemoryBuffer(1024);
             tmb.write(bs);
@@ -47,12 +47,12 @@ public class TSerialize {
         }
     }
 
-    public static String JEncode(JMqBean mb) {
+    public static String jEncode(JMqBean mb) {
         Gson gs = new Gson();
         return gs.toJson(mb);
     }
 
-    public static JMqBean JDecode(String loadstr) {
+    public static JMqBean jDecode(String loadstr) {
         Gson gs = new Gson();
         return gs.fromJson(loadstr, JMqBean.class);
     }
@@ -63,15 +63,27 @@ public class TSerialize {
         return crc32.getValue();
     }
 
-    public static long Byte2Long(byte[] bs) {
+    public static String string(byte[] bs){
+        return new String(bs,StandardCharsets.ISO_8859_1);
+    }
+
+    public static byte[] bytes(String s){
+        return s.getBytes(StandardCharsets.ISO_8859_1);
+    }
+
+    public static long byte2Long(byte[] bs) {
         ByteBuffer buf = ByteBuffer.allocate(Long.BYTES).order(ByteOrder.BIG_ENDIAN);
         buf.put(bs, 0, bs.length);
         buf.flip();
         return buf.getLong();
     }
 
-    public static byte[] Long2Byte(long value) {
+    public static byte[] long2Bytes(long value) {
         return ByteBuffer.allocate(Long.BYTES).order(ByteOrder.BIG_ENDIAN).putLong(0, value).array();
+    }
+
+    public static byte[] int2Bytes(int value) {
+        return ByteBuffer.allocate(Integer.BYTES).order(ByteOrder.BIG_ENDIAN).putInt(0, value).array();
     }
 
     public static byte[] zlibUncz(byte[] data) throws TlException {
@@ -103,8 +115,8 @@ public class TSerialize {
         bp.setTopic("22222222");
         bp.setMsg("33333".getBytes(StandardCharsets.UTF_8));
 
-        byte[] bb3 = TEncode(bp);
-        MqBean bp3 = (MqBean) TDecode(bb3, new MqBean());
+        byte[] bb3 = tEncode(bp);
+        MqBean bp3 = (MqBean) tDecode(bb3, new MqBean());
         for (byte b : bb3) {
             System.out.print(b);
             System.out.print(' ');
@@ -114,15 +126,19 @@ public class TSerialize {
         System.out.println(bp3.getTopic());
 
         JMqBean jbp = new JMqBean(1111, "wuwu", "nn");
-        String loadstr = JEncode(jbp);
+        String loadstr = jEncode(jbp);
         System.out.println(loadstr);
-        JMqBean jbp4 = JDecode(loadstr);
+        JMqBean jbp4 = jDecode(loadstr);
         System.out.println(jbp4.Id);
         System.out.println(jbp4.Topic);
         System.out.println(jbp4.toString());
 
         long value = 12345678;
-        byte[] bb = Long2Byte(value);
-        System.out.println(Byte2Long(bb));
+        byte[] bb = long2Bytes(value);
+        System.out.println(byte2Long(bb));
+
+        byte[] bs = new byte[]{1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0};
+        String s  = new String(bs,StandardCharsets.ISO_8859_1);
+        System.out.println(s.getBytes(StandardCharsets.ISO_8859_1).length);
     }
 }
