@@ -24,5 +24,7 @@ public class Const {
     final static byte MQ_CURRENTID = 13;
 
     final static byte MQ_ZLIB = 14;
+
+    final static byte MQ_LOCK = 15;
     final static byte MQ_ACK = 0;
 }
