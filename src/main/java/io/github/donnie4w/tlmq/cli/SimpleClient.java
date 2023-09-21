@@ -124,7 +124,7 @@ public class SimpleClient extends ICli implements MqClient {
                 case Const.MQ_PUBBYTE:
                     try {
                         if (this.pubByteHandler != null) {
-                            this.pubByteHandler.run(TSerialize.TDecode(m, new MqBean()));
+                            this.pubByteHandler.run(TSerialize.tDecode(m, new MqBean()));
                         }
                     } catch (Exception e) {
                         logger.info(e.getMessage());
@@ -133,7 +133,7 @@ public class SimpleClient extends ICli implements MqClient {
                 case Const.MQ_PUBJSON:
                     try {
                         if (this.pubJsonHandler != null) {
-                            this.pubJsonHandler.run(TSerialize.JDecode(new String(m, StandardCharsets.UTF_8)));
+                            this.pubJsonHandler.run(TSerialize.jDecode(new String(m, StandardCharsets.UTF_8)));
                         }
                     } catch (Exception e) {
                         logger.info(e.getMessage());
@@ -142,7 +142,7 @@ public class SimpleClient extends ICli implements MqClient {
                 case Const.MQ_PUBMEM:
                     try {
                         if (this.pubMemHandler != null) {
-                            this.pubMemHandler.run(TSerialize.JDecode(new String(m, StandardCharsets.UTF_8)));
+                            this.pubMemHandler.run(TSerialize.jDecode(new String(m, StandardCharsets.UTF_8)));
                         }
                     } catch (Exception e) {
                         logger.info(e.getMessage());
@@ -151,7 +151,7 @@ public class SimpleClient extends ICli implements MqClient {
                 case Const.MQ_PULLBYTE:
                     try {
                         if (this.pullByteHandler != null) {
-                            this.pullByteHandler.run(TSerialize.TDecode(m, new MqBean()));
+                            this.pullByteHandler.run(TSerialize.tDecode(m, new MqBean()));
                         }
                     } catch (Exception e) {
                         logger.info(e.getMessage());
@@ -160,7 +160,7 @@ public class SimpleClient extends ICli implements MqClient {
                 case Const.MQ_PULLJSON:
                     try {
                         if (this.pullJsonHandler != null) {
-                            this.pullJsonHandler.run(TSerialize.JDecode(new String(m, StandardCharsets.UTF_8)));
+                            this.pullJsonHandler.run(TSerialize.jDecode(new String(m, StandardCharsets.UTF_8)));
                         }
                     } catch (Exception e) {
                         logger.info(e.getMessage());
@@ -169,7 +169,7 @@ public class SimpleClient extends ICli implements MqClient {
                 case Const.MQ_ACK:
                     try {
                         if (this.ackHandler != null) {
-                            this.ackHandler.run(TSerialize.Byte2Long(Arrays.copyOfRange(msg, 1, 9)));
+                            this.ackHandler.run(TSerialize.byte2Long(Arrays.copyOfRange(msg, 1, 9)));
                         }
                     } catch (Exception e) {
                         logger.info(e.getMessage());
@@ -179,9 +179,9 @@ public class SimpleClient extends ICli implements MqClient {
                     try {
                         MergeBean mb = null;
                         if (this.isZlibOn) {
-                            mb = TSerialize.TDecode(TSerialize.zlibUncz(m), new MergeBean());
+                            mb = TSerialize.tDecode(TSerialize.zlibUncz(m), new MergeBean());
                         } else {
-                            mb = TSerialize.TDecode(m, new MergeBean());
+                            mb = TSerialize.tDecode(m, new MergeBean());
                         }
                         if (mb != null && mb.beanList != null) {
                             for (ByteBuffer bb : mb.beanList) {
@@ -195,7 +195,7 @@ public class SimpleClient extends ICli implements MqClient {
                 case Const.MQ_ERROR:
                     try {
                         if (this.errHandler != null) {
-                            this.errHandler.run(TSerialize.Byte2Long(Arrays.copyOfRange(msg, 1, 9)));
+                            this.errHandler.run(TSerialize.byte2Long(Arrays.copyOfRange(msg, 1, 9)));
                         }
                     } catch (Exception e) {
                         logger.info(e.getMessage());
@@ -285,6 +285,16 @@ public class SimpleClient extends ICli implements MqClient {
 
     public long pullIdSync(String topic) throws TlException {
         return this.cli.pullIdSync(topic);
+    }
+
+    @Override
+    public String lock(String str, int overtime) throws TlException {
+        return this.cli.lock(str,overtime);
+    }
+
+    @Override
+    public void unLock(String token) throws TlException {
+         this.cli.unLock(token);
     }
 
     public long recvAck(byte sec) throws TlException {
