@@ -55,6 +55,12 @@ public interface MqClient {
     // pull the maximum id number of the topic
     public long pullIdSync(String topic) throws TlException;
 
+    //Distributed lock, lock string, set the timeout period of the lock
+    public String lock(String str, int overtime) throws TlException;
+
+    //release lock resource
+    public void unLock(String token) throws TlException;
+
     // setup requires a client return receipt
     public long recvAck(byte sec) throws TlException;
 
