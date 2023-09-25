@@ -172,6 +172,10 @@ public class Cli extends Endpoint implements MessageHandler.Whole<byte[]> {
         return send(MQ_SUB, topic);
     }
 
+    public long subJson(String topic) throws TlException {
+        return send((byte) (MQ_SUB | 0x80), topic);
+    }
+
     public long subCancel(String topic) throws TlException {
         return send(MQ_SUBCANCEL, topic);
     }
@@ -218,7 +222,7 @@ public class Cli extends Endpoint implements MessageHandler.Whole<byte[]> {
 
     public JMqBean pullJsonSync(String topic, long id) throws TlException {
         String m = TSerialize.jEncode(new JMqBean((int) id, topic));
-        byte[] bs = HttpClient.post(this.cli.httpUrl, httpbody(m.getBytes(StandardCharsets.UTF_8),MQ_PULLJSON), this.cli.origin, this.cli.auth);
+        byte[] bs = HttpClient.post(this.cli.httpUrl, httpbody(m.getBytes(StandardCharsets.UTF_8), MQ_PULLJSON), this.cli.origin, this.cli.auth);
         switch (bs[0]) {
             case MQ_ERROR:
                 logger.info("pullJsonSync error >> " + topic + " >> " + id + " >> " + TSerialize.byte2Long(Arrays.copyOfRange(bs, 1, 9)));
@@ -232,7 +236,7 @@ public class Cli extends Endpoint implements MessageHandler.Whole<byte[]> {
 
     public MqBean pullByteSync(String topic, long id) throws TlException {
         byte[] mbs = TSerialize.tEncode(new MqBean(topic, id));
-        byte[] bs = HttpClient.post(this.cli.httpUrl, httpbody(mbs,MQ_PULLBYTE), this.cli.origin, this.cli.auth);
+        byte[] bs = HttpClient.post(this.cli.httpUrl, httpbody(mbs, MQ_PULLBYTE), this.cli.origin, this.cli.auth);
         switch (bs[0]) {
             case MQ_ERROR:
                 logger.info("pullByteSync error >> " + topic + " >> " + id + " >> " + TSerialize.byte2Long(Arrays.copyOfRange(bs, 1, 9)));
@@ -245,7 +249,7 @@ public class Cli extends Endpoint implements MessageHandler.Whole<byte[]> {
 
     public long pullIdSync(String topic) throws TlException {
         byte[] mbs = topic.getBytes(StandardCharsets.UTF_8);
-        byte[] bs = HttpClient.post(this.cli.httpUrl, httpbody(mbs,MQ_CURRENTID), this.cli.origin, this.cli.auth);
+        byte[] bs = HttpClient.post(this.cli.httpUrl, httpbody(mbs, MQ_CURRENTID), this.cli.origin, this.cli.auth);
         switch (bs[0]) {
             case MQ_ERROR:
                 logger.info("pullIdSync error >> " + topic + " >> " + TSerialize.byte2Long(Arrays.copyOfRange(bs, 1, 9)));
@@ -263,6 +267,28 @@ public class Cli extends Endpoint implements MessageHandler.Whole<byte[]> {
         return body;
     }
 
+    public String tryLock(String str, int overtime) throws TlException {
+        String key = null;
+        try {
+            byte[] strBs = str.getBytes(StandardCharsets.UTF_8);
+            long strId = getAckId();
+            ByteBuffer bb = ByteBuffer.allocate(2 + 8 + 4 + strBs.length);
+            bb.put(MQ_LOCK);
+            bb.put((byte) 2);
+            bb.put(TSerialize.long2Bytes(strId));
+            bb.put(TSerialize.int2Bytes(overtime));
+            bb.put(strBs);
+            byte[] bs = HttpClient.post(this.cli.httpUrl, bb.array(), this.cli.origin, this.cli.auth);
+            if (bs != null && bs.length == 16) {
+                key = TSerialize.string(bs);
+                lockmap.put(key, strId);
+            }
+        } catch (Exception e) {
+            throw new TlException(e);
+        }
+        return key;
+    }
+
     private static ConcurrentHashMap<String, Long> lockmap = new ConcurrentHashMap<>();
 
     public String lock(String str, int overtime) throws TlException {
@@ -277,13 +303,8 @@ public class Cli extends Endpoint implements MessageHandler.Whole<byte[]> {
             int count = 0;
             while (true) {
                 byte[] bs = HttpClient.post(this.cli.httpUrl, baos.toByteArray(), this.cli.origin, this.cli.auth);
-                System.out.println("bs.length>>>" + bs.length);
                 if (bs != null && bs.length == 16) {
                     key = TSerialize.string(bs);
-                    System.out.println(key + ">>>>>>" + TSerialize.bytes(key).length);
-                    if (lockmap.contains(key)) {
-                        System.out.println("======================>" + key);
-                    }
                     lockmap.put(key, strId);
                     break;
                 } else if (bs != null && bs[0] == 0) {
@@ -297,8 +318,8 @@ public class Cli extends Endpoint implements MessageHandler.Whole<byte[]> {
                     baos.write(str.getBytes(StandardCharsets.UTF_8));
                 }
                 count++;
-                if (count > 3) {
-                    break;
+                if (count > 10) {
+                    throw new TlException("lock " + str + " failed");
                 }
             }
         } catch (Exception e) {
@@ -317,14 +338,11 @@ public class Cli extends Endpoint implements MessageHandler.Whole<byte[]> {
         try {
             baos.write(new byte[]{MQ_LOCK, 3});
             Long strId = lockmap.get(token);
-            System.out.println("strId>>>>" + strId);
             if (strId != null) {
                 baos.write(TSerialize.long2Bytes(strId));
-                System.out.println("key len>>>>>" + TSerialize.bytes(token).length);
                 baos.write(TSerialize.bytes(token));
                 while (true) {
                     byte[] bs = HttpClient.post(this.cli.httpUrl, baos.toByteArray(), this.cli.origin, this.cli.auth);
-                    System.out.println("---------------------------------->");
                     if (bs[0] == 1) {
                         lockmap.remove(token);
                         break;
