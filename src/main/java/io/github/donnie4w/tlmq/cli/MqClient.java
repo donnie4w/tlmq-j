@@ -29,6 +29,9 @@ public interface MqClient {
     // Subscribe to a topic
     public long sub(String topic) throws TlException;
 
+    //it will alway return json format for this topic
+    //The pubJsonHandler interface receives data
+    public long subJson(String topic) throws TlException;
     // Unsubscribed topic
     public long subCancel(String topic) throws TlException;
 
@@ -57,6 +60,9 @@ public interface MqClient {
 
     //Distributed lock, lock string, set the timeout period of the lock
     public String lock(String str, int overtime) throws TlException;
+
+    //try to get a Distributed lock, lock string, set the timeout period of the lock
+    public String tryLock(String str, int overtime) throws TlException;
 
     //release lock resource
     public void unLock(String token) throws TlException;
