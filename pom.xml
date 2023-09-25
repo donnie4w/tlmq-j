@@ -6,7 +6,7 @@
 
     <groupId>io.github.donnie4w</groupId>
     <artifactId>tlmq-j</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.2</version>
     <packaging>jar</packaging>
 
     <name>${project.groupId}:${project.artifactId}</name>
@@ -50,7 +50,7 @@
         <dependency>
             <groupId>org.apache.tomcat.embed</groupId>
             <artifactId>tomcat-embed-websocket</artifactId>
-            <version>10.1.7</version>
+            <version>10.1.13</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -75,6 +75,18 @@
             <version>4.13.2</version>
         </dependency>
     </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>9</source>
+                    <target>9</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
