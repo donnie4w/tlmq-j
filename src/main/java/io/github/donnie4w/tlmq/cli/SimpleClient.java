@@ -33,7 +33,7 @@ public class SimpleClient extends ICli implements MqClient {
     private int pingCount;
     public Cli cli;
 
-    private Map<String, Byte> subMap = new HashMap();
+    private Map<String, Boolean> subMap = new HashMap();
 
     public SimpleClient(String url, String auth) {
         super(url, auth);
@@ -87,7 +87,11 @@ public class SimpleClient extends ICli implements MqClient {
             Thread.sleep(1000);
             if (this.subMap.size() > 0) {
                 for (String key : this.subMap.keySet()) {
-                    this.sub(key);
+                    if (this.subMap.get(key)){
+                        this.subJson(key);
+                    }else{
+                        this.sub(key);
+                    }
                 }
             }
             if (this.before != null) {
@@ -246,8 +250,13 @@ public class SimpleClient extends ICli implements MqClient {
     }
 
     public long sub(String topic) throws TlException {
-        this.subMap.put(topic, null);
+        this.subMap.put(topic, false);
         return this.cli.sub(topic);
+    }
+
+    public long subJson(String topic) throws TlException {
+        this.subMap.put(topic, true);
+        return this.cli.subJson(topic);
     }
 
     public long subCancel(String topic) throws TlException {
@@ -290,6 +299,10 @@ public class SimpleClient extends ICli implements MqClient {
     @Override
     public String lock(String str, int overtime) throws TlException {
         return this.cli.lock(str,overtime);
+    }
+
+    public String tryLock(String str, int overtime) throws TlException {
+        return this.cli.tryLock(str,overtime);
     }
 
     @Override
