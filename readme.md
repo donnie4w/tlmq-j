@@ -7,7 +7,7 @@
     <dependency>    
         <groupId>io.github.donnie4w</groupId>    
         <artifactId>tlmq-j</artifactId>    
-        <version>0.0.1</version>
+        <version>0.0.2</version>
     </dependency>
 	
 
